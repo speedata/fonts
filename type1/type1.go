@@ -1,3 +1,4 @@
+// Package type1 reads and writes fonts in Type1 format.
 package type1
 
 import (
@@ -41,6 +42,7 @@ type Type1 struct {
 	CharsName          map[string]Char
 	CharsCodepoint     map[rune]Char
 	Segments           [][]byte
+	SubsetID           string
 }
 
 // Subset reduces the first and second segment so that it only contains the necessary characters.
@@ -49,6 +51,7 @@ type Type1 struct {
 // and the error if something went wrong.
 func (t *Type1) Subset(subsetid string, runelist []rune) (string, error) {
 	var err error
+	t.SubsetID = subsetid
 	decoded := decodeEexec(t.Segments[1])
 	r := bytes.NewReader(decoded)
 
@@ -150,7 +153,8 @@ func (t *Type1) Subset(subsetid string, runelist []rune) (string, error) {
 
 // Read the charstring entry, but don't decrypt. If no more strings are available,
 // return an io.EOF.
-// The reader is expected to be a the beginning of an entry (at the forward slash of the name).
+// The reader is expected to be a the beginning of an entry
+// (at the forward slash of the name).
 func readCharstring(r *bytes.Reader) (charname string, buf []byte, err error) {
 	var b byte
 	b, err = r.ReadByte()

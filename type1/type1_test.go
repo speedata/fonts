@@ -23,8 +23,11 @@ func TestLoadFont(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expected := "Computer"
+	expected := "Computer Modern"
 	if t1font.FamilyName != expected {
 		t.Errorf("t1font.FamilyName got %s, want %s", t1font.FamilyName, expected)
+	}
+	if exp, res := 683, t1font.CapHeight; exp != res {
+		t.Errorf("t1font.Capheight = %d, want %d", res, exp)
 	}
 }
