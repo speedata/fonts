@@ -1,6 +1,6 @@
 package type1
 
-// The typcial PFB font starts with
+// The typcial PFB font is structured like this:
 // 128 01  <four bytes that encode the length of first segment>
 // %!PS-AdobeFont-1.0
 // % ...
@@ -16,7 +16,7 @@ import (
 	"io/ioutil"
 )
 
-// Read the contents of the file and store the result in the segments.
+// ParsePFB reads the contents of the file and store the result in the segments.
 func (t *Type1) ParsePFB(r io.Reader) error {
 	pfb, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -31,11 +31,11 @@ done_segments:
 			switch pfb[offset+1] {
 			case 1, 2:
 				// ascii, binary
-				length := uint32(pfb[offset+2]) + uint32(pfb[offset+3])<<8 + uint32(pfb[offset+4])<<16 + uint32(pfb[offset+5]<<24)
+				length := uint32(pfb[offset+2]) + uint32(pfb[offset+3])<<8 + uint32(pfb[offset+4])<<16 + uint32(pfb[offset+5])<<24
 				t.Segments = append(t.Segments, pfb[offset+6:offset+length+6])
 				offset = offset + 6 + length
 			case 3:
-				// eof marker
+				// EOF marker
 				break done_segments
 			}
 		}

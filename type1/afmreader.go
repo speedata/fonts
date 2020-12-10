@@ -77,7 +77,6 @@ func parseKernData(t *Type1, scanner *bufio.Scanner) error {
 }
 
 func parseKernPairs(t *Type1, scanner *bufio.Scanner) error {
-
 	for scanner.Scan() {
 		tokens := strings.Split(scanner.Text(), " ")
 		switch tokens[0] {

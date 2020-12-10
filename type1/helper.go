@@ -3,6 +3,7 @@ package type1
 import (
 	"bytes"
 	"fmt"
+	"path/filepath"
 	"unicode"
 )
 
@@ -55,7 +56,8 @@ func readString(r *bytes.Reader) (string, error) {
 	return string(buf), nil
 }
 
-// Read and return a PostScript name from r. A name consists of letters, punctuation and numbers (/.notdef /Euro123).
+// Read and return a PostScript name from r.
+// A name consists of letters, punctuation and numbers (/.notdef /Euro123).
 // Skips whitespace at the end.
 func readName(r *bytes.Reader) (string, error) {
 	buf := []byte{}
@@ -103,4 +105,10 @@ func forwardTo(r *bytes.Reader, b byte) error {
 		}
 	}
 	return nil
+}
+
+// Trim the file name extension from the file
+func trimSuffix(fn string) string {
+	var extension = filepath.Ext(fn)
+	return fn[0 : len(fn)-len(extension)]
 }

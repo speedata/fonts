@@ -2,15 +2,14 @@ package type1
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
 
+// Char holds the information about one of the max. 255 characters in a font.
 type Char struct {
 	Name          string
 	Codepoint     rune
@@ -21,6 +20,7 @@ type Char struct {
 	Charstring    []byte
 }
 
+// Type1 holds all information about a Type 1 font
 type Type1 struct {
 	FontName           string
 	FullName           string
@@ -245,9 +245,9 @@ func (t *Type1) Write(w io.Writer) error {
 	return err
 }
 
-// Write the PFB file to given file name.
+// WriteFile writes the PFB file to given file name.
 func (t *Type1) WriteFile(filename string) error {
-	w, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	w, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
@@ -273,13 +273,14 @@ func (t *Type1) writeSegment(w io.Writer, segment int) error {
 	return err
 }
 
-// Load a type1 PostScript font. The PFB file must be given, the afm file is optional.
-// If it is not given, it is deduced from the given PFB file.
+// LoadFont opens a Type1 PostScript font.
+// The PFB file must be given, the afm file is optional.
+// If it is empty, it is deduced from the given PFB file.
 func LoadFont(pfbfilename string, afmfilename string) (*Type1, error) {
-	pfbfilenameWithoutExt := strings.TrimSuffix(pfbfilename, filepath.Ext(pfbfilename))
+	pfbfilenameWithoutExt := trimSuffix(pfbfilename)
 	possiblePFBFilenames := []string{pfbfilename, pfbfilenameWithoutExt + ".PFB", pfbfilenameWithoutExt + ".pfb"}
-	possibleAFMFilenames := []string{}
 
+	possibleAFMFilenames := []string{}
 	if afmfilename == "" {
 		// Let's try to find a suitable AFM file
 		possibleAFMFilenames = append(possibleAFMFilenames, pfbfilenameWithoutExt+".AFM")
@@ -314,5 +315,5 @@ func tryOpen(filenames []string) (*os.File, error) {
 			return f, nil
 		}
 	}
-	return nil, errors.New("can't find file")
+	return nil, fmt.Errorf("cannot find file %q", filenames)
 }
