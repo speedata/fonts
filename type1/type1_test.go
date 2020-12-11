@@ -31,3 +31,11 @@ func TestLoadFont(t *testing.T) {
 		t.Errorf("t1font.Capheight = %d, want %d", res, exp)
 	}
 }
+
+func TestCharTag(t *testing.T) {
+	rl := []rune{32, 72, 100, 101, 108, 111, 114, 119}
+	ret := getCharTag(rl)
+	if len(ret) != 6 {
+		t.Errorf("len(getCharTag()) = %d, want %d", len(ret), 6)
+	}
+}

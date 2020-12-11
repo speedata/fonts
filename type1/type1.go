@@ -3,6 +3,7 @@ package type1
 
 import (
 	"bytes"
+	"crypto/md5"
 	"fmt"
 	"io"
 	"os"
@@ -45,13 +46,24 @@ type Type1 struct {
 	SubsetID           string
 }
 
+// Return a string of length 6 based on the characters in runelist.
+// All returned characters are in the range A-Z.
+func getCharTag(runelist []rune) string {
+	sum := md5.Sum([]byte(string(runelist)))
+	ret := make([]rune, 6)
+	for i := 0; i < 6; i++ {
+		ret[i] = rune(sum[2*i]+sum[2*i+1])/26 + 'A'
+	}
+	return string(ret)
+}
+
 // Subset reduces the first and second segment so that it only contains the necessary characters.
 // Name must be a string length 6 such as "ABCDEF" and should be unique.
 // Returns a string containing all the names of the used characters, for example /one/a/b/V/exclam,
 // and the error if something went wrong.
-func (t *Type1) Subset(subsetid string, runelist []rune) (string, error) {
+func (t *Type1) Subset(runelist []rune) (string, error) {
 	var err error
-	t.SubsetID = subsetid
+	t.SubsetID = getCharTag(runelist)
 	decoded := decodeEexec(t.Segments[1])
 	r := bytes.NewReader(decoded)
 
@@ -122,7 +134,7 @@ func (t *Type1) Subset(subsetid string, runelist []rune) (string, error) {
 	fontnameRegexp := regexp.MustCompile("/FontName /(.*) def")
 	for i := 0; i < len(lines); i++ {
 		if strings.HasPrefix(lines[i], "/FontName") {
-			lines[i] = fontnameRegexp.ReplaceAllString(lines[i], "/FontName /"+subsetid+"+$1 def")
+			lines[i] = fontnameRegexp.ReplaceAllString(lines[i], "/FontName /"+t.SubsetID+"+$1 def")
 		}
 	}
 	segments0 = []byte(strings.Join(lines, "\n"))
